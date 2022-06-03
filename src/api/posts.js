@@ -41,4 +41,39 @@ router.post('/', async (req, res, next) => {
   }
 });
 
+/**
+ * @desc Get all posts by authorIds, sort by sortBy and order (asc or desc)
+ * @params req.query is expected to contain:
+ * {
+ *  authorIds: required(string)),
+ *  sortBy: optional(string) = 'id',
+ *  order: optional(string) = 'asc'
+ * }
+ * @todo implement pagination (limit and offset)
+ */
+router.get('/', async (req, res, next) => {
+  try {
+    // Validation
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+
+    const { authorIds, sortBy, order } = req.query;
+
+    if (!authorIds) {
+      return res
+        .status(400)
+        .json({ error: 'Must provide authorIds for the posts' });
+    }
+
+    const authorIdsInt = authorIds.split(',').map(Number);
+
+    const posts = await Post.getPostsByUserId(authorIdsInt, sortBy, order);
+
+    res.json({ posts });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
