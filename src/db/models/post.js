@@ -30,10 +30,13 @@ const Post = db.define(
     },
     tags: {
       // note: comma separated string since sqlite does not support arrays
-      // todo: rewrite existing logic to support array setter
-      // set(val) {
-      //   this.setDataValue('tags',val.join(','));
-      // },
+      set(tags) {
+        if (typeof tags === 'string') {
+          this.setDataValue('tags', tags);
+          return;
+        }
+        this.setDataValue('tags', tags.join(','));
+      },
       type: Sequelize.STRING,
       get() {
         return this.getDataValue('tags').split(',');
