@@ -41,17 +41,26 @@ const Post = db.define(
   }
 );
 
-Post.getPostsByUserId = async function (userId) {
+/**
+ * @desc Get all posts by authorIds, sort by sortBy and order (asc or desc)
+ * @params userIds: required(Array<Number>), 
+ *         sortBy: optional(string), 
+ *         order: optional(string)
+ */
+Post.getPostsByUserId = async function (userIds, sortBy = 'id', order = 'asc') {
   return Post.findAll({
     include: [
       {
         model: UserPost,
         attributes: [],
         where: {
-          userId: [userId],
+          userId: userIds
         },
       },
     ],
+    order: [
+      [sortBy, order]
+    ]
   });
 };
 
