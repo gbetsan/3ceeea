@@ -14,9 +14,11 @@ You will be modifying an existing server that provides an API for a blogging web
 
 Currently, the starting code has the following API routes already implemented:
 
-- POST `/api/register` - Register a new user
-- POST `/api/login` - Login for an existing user
-- POST `/api/posts` - Create a new post
+- POST  `/api/register` - Register a new user
+- POST  `/api/login` - Login for an existing user
+- POST  `/api/posts` - Create a new post
+- GET   `/api/posts` - Get posts by authors
+- PATCH `/api/posts/:postId` - Update existing post with new data
 
 Only a logged in `User` can use this blogging website API, with the exception of the login and register routes.
 
@@ -108,5 +110,30 @@ curl --location --request POST 'localhost:5000/api/posts' \
 --data-raw '{
     "text": "This is some text for the blog post...",
     "tags": ["travel", "hotel"]
+}'
+```
+
+If you want to retrieve current posts, you can make following request:
+```bash
+curl --location --request GET 'localhost:5000/api/posts' \
+--header 'x-access-token: your-token-here' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "authorIds": "1,3",
+    "order": "asc",
+    "sortBy": "id"
+}'
+```
+
+Or when you need to update data on an existing post:
+(only sent field will be updated)
+```bash
+curl --location --request PATCH 'localhost:5000/api/posts/:postId' \
+--header 'x-access-token: your-token-here' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "authorIds": [1, 2, 3],
+    "text": "New text here",
+    "tags": ["new", "tags"]
 }'
 ```
