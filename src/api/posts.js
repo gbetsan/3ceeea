@@ -1,8 +1,13 @@
 const express = require('express');
 const { Post, UserPost } = require('../db/models');
 const { updateValuesHelper } = require('./helpers/posts_helper');
+const { Validator } = require('express-json-validator-middleware');
 
 const router = express.Router();
+const { validate, ajv } = new Validator();
+
+const getPostsSchema   = require('../schema/posts/get_posts.json')
+const patchPostsSchema = require('../schema/posts/patch_posts.json');
 
 /**
  * Create a new blog post
@@ -45,18 +50,15 @@ router.post('/', async (req, res, next) => {
 /**
  * @path /api/posts/
  * @method GET
- * @desc Get all posts by authorIds, sort by sortBy and order (asc or desc)
- * @params req.query is expected to contain:
- * {
- *  authorIds: required(string)),
- *  sortBy: optional(string) = 'id',
- *  order: optional(string) = 'asc'
- * }
+ * @desc Get all posts by authorIds, sort by sortBy and direction (asc or desc)
+ * @params see corresponding schema
  * @todo implement pagination (limit and offset)
  */
-router.get('/', async (req, res, next) => {
+router.get('/',
+  validate(getPostsSchema), 
+  async (req, res, next) => {
   try {
-    // Validation
+    // Authentication
     if (!req.user) {
       return res.status(401).json({ error: 'Not Authorized' });
     }
@@ -83,28 +85,21 @@ router.get('/', async (req, res, next) => {
  * @path /api/posts/:postId
  * @method PATCH
  * @desc Patch a post by postId
- * @params req.body is expected to contain
- * {
- *    authorIds: optional(Array<Number>),
- *    tags: optional(Array<string>),
- *    text: optional(string),
- * }
+ * @params see corresponding schema
  * @todo extract some logic to a separate helper functions
  * @todo improve error handling
  */
-router.patch('/:postId', async (req, res, next) => {
+router.patch('/:postId',
+  validate(patchPostsSchema), 
+  async (req, res, next) => {
   try {
-    // Validation
+    // Authentication
     if (!req.user) {
       return res.status(401).json({ error: 'Not Authorized' });
     }
 
     const { postId } = req.params;
     const { authorIds, tags, text } = req.body;
-
-    if (!postId) {
-      return res.status(400).json({ error: 'Must provide postId' });
-    }
 
     const post = await Post.findOne({
       where: {

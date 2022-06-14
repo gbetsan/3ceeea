@@ -1,0 +1,26 @@
+{
+    "query": {
+        "type": "object",
+        "properties": {
+            "authorIds": {
+                "type": "string",
+                "description": "Comma separated list of author ids",
+                "pattern": "^[0-9,]+$"
+            },
+            "sortBy": {
+                "type": "string",
+                "description": "Sort by field",
+                "enum": ["id", "text", "likes", "reads", "popularity"],
+                "default": "id"
+            },
+            "direction": {
+                "type": "string",
+                "description": "Sort direction",
+                "enum": ["asc", "desc",
+                         "ASC", "DESC"],
+                "default": "asc"
+            }
+        },
+        "required": ["authorIds"]
+    }
+}
