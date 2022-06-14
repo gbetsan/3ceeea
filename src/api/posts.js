@@ -6,7 +6,7 @@ const { Validator } = require('express-json-validator-middleware');
 const router = express.Router();
 const { validate, ajv } = new Validator();
 
-const getPostsSchema   = require('../schema/posts/get_posts.json')
+const getPostsSchema = require('../schema/posts/get_posts.json');
 const patchPostsSchema = require('../schema/posts/patch_posts.json');
 
 /**
@@ -54,9 +54,7 @@ router.post('/', async (req, res, next) => {
  * @params see corresponding schema
  * @todo implement pagination (limit and offset)
  */
-router.get('/',
-  validate(getPostsSchema), 
-  async (req, res, next) => {
+router.get('/', validate(getPostsSchema), async (req, res, next) => {
   try {
     // Authentication
     if (!req.user) {
@@ -89,9 +87,7 @@ router.get('/',
  * @todo extract some logic to a separate helper functions
  * @todo improve error handling
  */
-router.patch('/:postId',
-  validate(patchPostsSchema), 
-  async (req, res, next) => {
+router.patch('/:postId', validate(patchPostsSchema), async (req, res, next) => {
   try {
     // Authentication
     if (!req.user) {

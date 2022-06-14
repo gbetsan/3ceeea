@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { ValidationError } = require("express-json-validator-middleware");
-
+const { ValidationError } = require('express-json-validator-middleware');
 
 function notFound(req, res) {
   res.status(404);
@@ -23,12 +22,13 @@ function errorHandler(err, req, res, next) {
 /* eslint-disable-next-line no-unused-vars */
 function validationErrorHandler(err, req, res, next) {
   if (err instanceof ValidationError) {
-    firstError = err.validationErrors[Object.keys(err.validationErrors)[0]][0];
-    error = `${firstError.instancePath} ${firstError.message}`;
+    let firstError =
+      err.validationErrors[Object.keys(err.validationErrors)[0]][0];
+    let error = `${firstError.instancePath} ${firstError.message}`;
     res.status(400).send({
       // @todo: reconsider the error message to follow JSON-API specs
       // errors: err.validationErrors
-      error
+      error,
     });
     // next();
   } else {
@@ -68,5 +68,5 @@ module.exports = {
   notFound,
   errorHandler,
   auth,
-  validationErrorHandler
+  validationErrorHandler,
 };
