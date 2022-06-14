@@ -1,0 +1,48 @@
+{
+    "body": {
+        "type": "object",
+        "properties": {
+            "tags": {
+                "type": "array",
+                "description": "Array of string tags",
+                "items": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 1
+                },
+                "minItems": 1,
+                "maxItems": 20,
+                "uniqueItems": true
+            },
+            "text": {
+                "type": "string",
+                "description": "Post text",
+                "minLength": 1,
+                "maxLength": 1000
+            },
+            "authorIds": {
+                "type": "array",
+                "description": "The ids of the authors of the post",
+                "uniqueItems": true,
+                "minItems": 1,
+                "maxItems": 20,
+                "items": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        }
+    },
+    "params": {
+        "type": "object",
+        "properties": {
+            "postId": {
+                "type": ["integer", "string"],
+                "pattern": "^[0-9]+$"
+            }
+        },
+        "required": [
+            "postId"
+        ]
+    }
+}
