@@ -63,7 +63,7 @@ router.get('/',
       return res.status(401).json({ error: 'Not Authorized' });
     }
 
-    const { authorIds, sortBy, order } = req.query;
+    const { authorIds, sortBy, direction } = req.query;
 
     if (!authorIds) {
       return res
@@ -73,7 +73,7 @@ router.get('/',
 
     const authorIdsInt = authorIds.split(',').map(Number);
 
-    const posts = await Post.getPostsByUserId(authorIdsInt, sortBy, order);
+    const posts = await Post.getPostsByUserId(authorIdsInt, sortBy, direction);
 
     res.json({ posts });
   } catch (error) {
