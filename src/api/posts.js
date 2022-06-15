@@ -140,8 +140,8 @@ router.patch('/:postId', validate(patchPostsSchema), async (req, res, next) => {
       attributes: ['userId'],
     });
     serialize.authorIds = userposts.map((userpost) => userpost.userId);
-    const date = new Date();
-    serialize.updatedAt = date.toISOString();
+    // const date = new Date();
+    // serialize.updatedAt = date.toISOString();
 
     delete serialize.user_posts;
     res.json({
