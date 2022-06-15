@@ -19,6 +19,7 @@ app.use(middlewares.auth);
 
 app.use('/api', api);
 
+app.use(middlewares.validationErrorHandler);
 app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
 

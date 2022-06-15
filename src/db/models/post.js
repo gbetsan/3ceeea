@@ -30,7 +30,17 @@ const Post = db.define(
     },
     tags: {
       // note: comma separated string since sqlite does not support arrays
+      set(tags) {
+        if (typeof tags === 'string') {
+          this.setDataValue('tags', tags);
+          return;
+        }
+        this.setDataValue('tags', tags.join(','));
+      },
       type: Sequelize.STRING,
+      get() {
+        return this.getDataValue('tags').split(',');
+      },
       allowNull: false,
     },
   },
@@ -41,17 +51,24 @@ const Post = db.define(
   }
 );
 
-Post.getPostsByUserId = async function (userId) {
+/**
+ * @desc Get all posts by authorIds, sort by sortBy and order (asc or desc)
+ * @params userIds: required(Array<Number>),
+ *         sortBy: optional(string),
+ *         order: optional(string)
+ */
+Post.getPostsByUserId = async function (userIds, sortBy = 'id', order = 'asc') {
   return Post.findAll({
     include: [
       {
         model: UserPost,
         attributes: [],
         where: {
-          userId: [userId],
+          userId: userIds,
         },
       },
     ],
+    order: [[sortBy, order]],
   });
 };
 
