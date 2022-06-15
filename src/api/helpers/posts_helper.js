@@ -4,11 +4,11 @@ const { UserPost } = require('../../db/models');
  * @desc Update Post associations with authors through UserPost
  * @param postId:  required(Number)
  * @param userIds: required(Array<Number>)
+ * @param ownerId: required(Number)
  * @todo move to db/models/user_post.js
- * @todo check for unique authorIds
- * @todo make sure there is at least one author
- * */
-const updateAssociationsHelper = async function (postId, userIds) {
+ */
+const updateAssociationsHelper = async function (post, userIds, ownerId) {
+  const postId = post.id;
   const currentAssociations = await UserPost.findAll({
     where: {
       postId,
@@ -19,12 +19,14 @@ const updateAssociationsHelper = async function (postId, userIds) {
   );
 
   const toAdd = userIds.filter((id) => !currentAuthorIds.includes(id));
-  const toRemove = currentAuthorIds.filter((id) => !userIds.includes(id));
+  const toRemove = currentAuthorIds.filter(
+    (id) => !userIds.includes(id) && id !== ownerId
+  );
 
   if (toAdd.length > 0) {
     await UserPost.bulkCreate(
-      toAdd.map((id) => ({
-        userId: id,
+      toAdd.map((userId) => ({
+        userId,
         postId,
       }))
     );
@@ -42,18 +44,14 @@ const updateAssociationsHelper = async function (postId, userIds) {
 
 /**
  * @brief Return hashmap of post updates
- * @param postId: required(Number)
- * @param values.authorIds: optional(Array<Number>)
  * @param values.text: optional(String)
  * @param values.tags: optional(Array<String>)
  * @returns {text: String, tags: Array<String>}
  */
-const updateValuesHelper = async function (postId, values) {
-  const { authorIds, text, tags } = values;
+const updateValuesHelper = async function (values) {
+  const { text, tags } = values;
   const update = {};
-  if (authorIds) {
-    await updateAssociationsHelper(postId, authorIds);
-  }
+
   if (tags) {
     update.tags = tags;
   }

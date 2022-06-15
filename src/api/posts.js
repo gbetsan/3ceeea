@@ -1,12 +1,15 @@
 const express = require('express');
 const { Post, UserPost } = require('../db/models');
-const { updateValuesHelper } = require('./helpers/posts_helper');
+const {
+  updateValuesHelper,
+  updateAssociationsHelper,
+} = require('./helpers/posts_helper');
 const { Validator } = require('express-json-validator-middleware');
 
 const router = express.Router();
-const { validate, ajv } = new Validator();
+const { validate } = new Validator();
 
-const getPostsSchema   = require('../schema/posts/get_posts.json')
+const getPostsSchema = require('../schema/posts/get_posts.json');
 const patchPostsSchema = require('../schema/posts/patch_posts.json');
 
 /**
@@ -54,9 +57,7 @@ router.post('/', async (req, res, next) => {
  * @params see corresponding schema
  * @todo implement pagination (limit and offset)
  */
-router.get('/',
-  validate(getPostsSchema), 
-  async (req, res, next) => {
+router.get('/', validate(getPostsSchema), async (req, res, next) => {
   try {
     // Authentication
     if (!req.user) {
@@ -89,9 +90,7 @@ router.get('/',
  * @todo extract some logic to a separate helper functions
  * @todo improve error handling
  */
-router.patch('/:postId',
-  validate(patchPostsSchema), 
-  async (req, res, next) => {
+router.patch('/:postId', validate(patchPostsSchema), async (req, res, next) => {
   try {
     // Authentication
     if (!req.user) {
@@ -115,13 +114,6 @@ router.patch('/:postId',
       ],
     });
 
-    // TODO: implement separate validation to see if user is allowed to edit post
-    // and return 403 if not. Current implementation is more efficient.
-    // // if user is not the owner of the post, return 403
-    // if (postc.userPost.userId !== req.user.id) {
-    //   return res.sendStatus(403);
-    // }
-
     // Check if post exists
     if (!post) {
       return res
@@ -130,23 +122,35 @@ router.patch('/:postId',
     }
 
     // Update post
-    const values = await updateValuesHelper(postId, { authorIds, tags, text });
-    await post.update(values, {
-      where: { id: postId },
-    });
+    if (authorIds) {
+      await updateAssociationsHelper(post, authorIds, req.user.id);
+    }
+    const values = await updateValuesHelper({ tags, text });
+    if (values.text || values.tags) {
+      await post.update(values);
+    }
 
     // Serialize post
     const serialize = post.get({ plain: true });
-    serialize.authorIds = authorIds;
+
+    let userposts = await UserPost.findAll({
+      where: {
+        postId,
+      },
+      attributes: ['userId'],
+    });
+    serialize.authorIds = userposts.map((userpost) => userpost.userId);
+
     delete serialize.user_posts;
-    res.json({ post: serialize });
+    res.json({
+      post: serialize,
+    });
   } catch (error) {
-    console.log(error.name);
     if (error.name === 'SequelizeForeignKeyConstraintError') {
       return res.status(404).json({ error: 'Author not found' });
     }
     if (error.name === 'SequelizeValidationError') {
-      return res.status(401).json({ error: 'Validation error' });
+      return res.status(400).json({ error: 'Validation error' });
     }
     next(error);
   }
