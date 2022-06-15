@@ -10,13 +10,13 @@
       "sortBy": {
         "type": "string",
         "description": "Sort by field",
-        "enum": ["id", "text", "likes", "reads", "popularity"],
+        "enum": ["id", "likes", "reads", "popularity"],
         "default": "id"
       },
       "direction": {
         "type": "string",
         "description": "Sort direction",
-        "enum": ["asc", "desc", "ASC", "DESC"],
+        "enum": ["asc", "desc"],
         "default": "asc"
       }
     },
